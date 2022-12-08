@@ -1,0 +1,125 @@
+from application import app
+from flask import render_template, redirect, url_for, flash
+from application.models import User
+from application.forms import RegisterForm, LoginForm, SearchForm
+from application import db
+from flask_login import login_user, logout_user, login_required
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
+from nltk.stem import WordNetLemmatizer
+import math
+import numpy
+
+document_1 = "I love watching movies when it's cold outside"
+document_2 = "Toy Story is the best animation movie ever, I love it!"
+document_3 = "Watching horror movies alone at night is really scary"
+document_4 = "He loves to watch films filled with suspense and unexpected plot twists"
+document_5 = "My mom loves to watch movies. My dad hates movie theaters. My brothers like any kind of movie. And I haven't watched a single movie since I got into college"
+documents = [document_1, document_2, document_3, document_4, document_5]
+
+def stop_words_elimination(document):
+    stop_words = set(stopwords.words('english'))
+    word_tokens = word_tokenize(document)
+    filtered_sentence = [w for w in word_tokens if not w.lower() in stop_words]
+    return filtered_sentence
+
+def lemmatisation(document):
+    word_after_lemmatization=[]
+    for mot in stop_words_elimination(document):
+        lemmatizer = WordNetLemmatizer()
+        word_after_lemmatization.append(lemmatizer.lemmatize(mot))
+    return word_after_lemmatization
+
+def normalised_tf(mot, document):
+    f = document.count(mot)
+    if f == 0:
+        return 0
+    return 1 + math.log(f)
+
+def idf(mot):
+    df=0
+    for document in documents:
+        if document.count!=0:
+            df+=1
+    return math.log(len(documents)/df)
+
+def tfidf(mot,document):
+    return normalised_tf(mot, document)*idf(mot)
+
+
+def coordonnees(document):
+    coordonnees=[]
+    l=[]
+    for doc in documents:
+        l.extend(lemmatisation(doc))
+    for m in l:
+        coordonnees.append(tfidf(m,document))
+    return coordonnees
+
+def prod_scal(l,m):
+    sum_prod_scal=0
+    for x,y in l,m:
+        sum_prod_scal+=x*y
+    return sum_prod_scal
+
+def norme(l):
+    norme=0
+    for x in l:
+        norme+=x**2
+    return norme
+
+
+@app.route('/')
+@app.route('/home')
+def home_page():
+    return render_template('home.html')
+
+@app.route('/result')
+def result_page():
+    return render_template('result.html')
+
+
+@app.route('/besisearch', methods=['GET', 'POST'])
+def searchbesi_page():
+    Q = SearchForm()
+    return render_template('besisearch.html',Q=Q)
+
+@app.route('/register', methods=['GET', 'POST'])
+def register_page():
+    form = RegisterForm()
+    if form.validate_on_submit():
+        user_to_create = User(username=form.username.data,
+                              email_address=form.email_address.data,
+                              password=form.password1.data)
+        db.session.add(user_to_create)
+        db.session.commit()
+        login_user(user_to_create)
+        flash(f"Votre compte a été créé avec succès vous êtes maintenant connecté avec {user_to_create.username}", category='success')
+        return redirect(url_for('searchbesi_page'))
+    if form.errors != {}: #If there are not errors from the validations
+        for err_msg in form.errors.values():
+            flash(f"Une erreur s'est produite lors de la création de l'utilisateur: {err_msg}", category='danger')
+
+    return render_template('register.html', form=form)
+
+@app.route('/login', methods=['GET', 'POST'])
+def login_page():
+    form = LoginForm()
+    if form.validate_on_submit():
+        attempted_user = User.query.filter_by(username=form.username.data).first()
+        if attempted_user and attempted_user.check_password_correction(
+                attempted_password=form.password.data
+        ):
+            login_user(attempted_user)
+            flash(f'Vous êtes maintenant connecté avec: {attempted_user.username}', category='success')
+            return redirect(url_for('searchbesi_page'))
+        else:
+            flash("Le nom d'utilisateur ou le mot de passe sont incorrectes, veuiller ressayer", category='danger')
+
+    return render_template('login.html', form=form)
+
+@app.route('/logout')
+def logout_page():
+    logout_user()
+    flash("Vous êtes déconnecté!", category='info')
+    return redirect(url_for("home_page"))
