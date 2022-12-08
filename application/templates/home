@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}
+    BESI SEARCH
+{% endblock %}
+{% block content %}
+    <div class="position-relative overflow-hidden p-3 p-md-5 m-md-3 text-center bg-dark" style="color:white">
+        <div class="col-md-5 p-lg-5 mx-auto my-5">
+            <h1 class="display-4 font-weight-normal"><span style="color: orange;">B</span><span style="color: blue;">ESI</span><span style="color: orange;">SEARCH</span></h1>
+            <p class="lead font-weight-normal">Commencer vos recherches sur l'ensemble des livres offerts par la bibliothèque de l'ESI avec BESI SEARCH</p>
+            <a class="btn btn-primary" href="{{ url_for('result_page') }}">Commencer</a>
+        </div>
+        <div class="product-device box-shadow d-none d-md-block"></div>
+        <div class="product-device product-device-2 box-shadow d-none d-md-block"></div>
+    </div>
+{% endblock %}
