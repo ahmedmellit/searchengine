@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block title %}
+  BESI SEARCH
+{% endblock %}
+
+{% block content %}
+<body class="text-center">
+  <div class="container">
+      <form method="POST" class="form-signin" style="color:white">
+          {{ Q.hidden_tag() }}
+          <h1 class="h3 mb-3 font-weight-normal" style="margin-top:50px;">
+            <span style="color: orange;">B</span><span style="color: blue;">ESI</span><span style="color: orange;">SEARCH</span>
+          </h1>
+          
+          {{ Q.search(class="form-control", placeholder="Rechercher") }}
+          <br>
+          <div style="margin-bottom: 150px;">
+              {{ Q.submit(class="btn btn-lg btn-block btn-primary") }}
+          </div>
+        
+      </form>
+  </div>
+</body>
+{% endblock %}
