@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}
+    Page d'identification
+{% endblock %}
+
+{% block content %}
+<body class="text-center">
+    <div class="container">
+        <form method="POST" class="form-signin" style="color:white">
+            {{ form.hidden_tag() }}
+            <h1 class="h3 mb-3 font-weight-normal" style="margin-top:20px;">
+                Connecter-vous
+            </h1>
+            
+            {{ form.username(class="form-control", placeholder="Nom d'utilisateur") }}
+            <br>
+            {{ form.password(class="form-control", placeholder="Mot de passe") }}
+            <br>
+            <div class="checkbox mb-3">
+               <h6>Vous n'avez pas de compte?</h6>
+               <a class="btn btn-sm btn-secondary" href="{{ url_for('register_page') }}">S'inscrire</a>
+            </div>
+
+            <div style="margin-bottom: 150px;">
+                {{ form.submit(class="btn btn-lg btn-block btn-primary") }}
+            </div>
+
+        </form>
+    </div>
+</body>
+{% endblock %}
